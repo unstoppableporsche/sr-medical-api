@@ -1,0 +1,65 @@
+[
+  {
+    "patientId": "PAT-SAM-001",
+    "firstName": "Sam",
+    "lastName": "Unknown",
+    "dob": "1992-01-14T16:00:00.000Z",
+    "phone": "555-666-7777",
+    "insertedDate": "2026-06-30T11:23:00.000Z",
+    "updatedDate": "2026-06-30T11:23:00.000Z"
+  },
+  {
+    "patientId": "PAT-EMMA-001",
+    "firstName": "Emma",
+    "lastName": "Johnson",
+    "dob": "2020-07-09T17:00:00.000Z",
+    "phone": "555-987-6543",
+    "insertedDate": "2026-06-30T11:23:00.000Z",
+    "updatedDate": "2026-06-30T11:23:00.000Z"
+  },
+  {
+    "patientId": "PAT-PRIYA-001",
+    "firstName": "Priya",
+    "lastName": "Sharma",
+    "dob": "1990-10-11T17:00:00.000Z",
+    "phone": "555-000-1111",
+    "insertedDate": "2026-06-30T11:22:00.000Z",
+    "updatedDate": "2026-06-30T11:22:00.000Z"
+  },
+  {
+    "patientId": "PAT-DANIEL-001",
+    "firstName": "Daniel",
+    "lastName": "Ortiz",
+    "dob": "1980-01-07T16:00:00.000Z",
+    "phone": "555-444-5555",
+    "insertedDate": "2026-06-30T11:22:00.000Z",
+    "updatedDate": "2026-06-30T11:22:00.000Z"
+  },
+  {
+    "patientId": "PAT-JORDAN-001",
+    "firstName": "Jordan",
+    "lastName": "Lee",
+    "dob": "1992-05-01T17:00:00.000Z",
+    "phone": "555-222-3333",
+    "insertedDate": "2026-06-30T11:22:00.000Z",
+    "updatedDate": "2026-06-30T11:22:00.000Z"
+  },
+  {
+    "patientId": "PAT-ALEX-001",
+    "firstName": "Alex",
+    "lastName": "Johnson",
+    "dob": "1985-03-04T16:00:00.000Z",
+    "phone": "555-123-4567",
+    "insertedDate": "2026-06-30T11:22:00.000Z",
+    "updatedDate": "2026-06-30T11:22:00.000Z"
+  },
+  {
+    "patientId": "PAT-CHILD-001",
+    "firstName": "Emma",
+    "lastName": "Johnson",
+    "dob": "2019-03-14T17:00:00.000Z",
+    "phone": "+1-510-555-1234",
+    "insertedDate": "2026-06-30T11:20:00.000Z",
+    "updatedDate": "2026-06-30T11:20:00.000Z"
+  }
+]
