@@ -55,14 +55,42 @@ function formatSlot(slot) {
   };
 }
 
+app.get('/', (req, res) => {
+  res.send(`
+    <html>
+      <head>
+        <title>SR Medical API</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; margin: 24px; }
+          pre { background: #f4f4f4; padding: 12px; border-radius: 6px; }
+          code { color: #c7254e; }
+        </style>
+      </head>
+      <body>
+        <h1>SR Medical API</h1>
+        <p>This API supports appointment booking across multiple departments.</p>
+        <p>Use the endpoints below to check availability, book appointments, and view patient bookings.</p>
+        <h2>Available routes</h2>
+        <ul>
+          <li><strong>GET /api/health</strong> - service health check</li>
+          <li><strong>GET /api/appointments/availability</strong> - list available slots</li>
+          <li><strong>POST /api/appointments</strong> - book an appointment</li>
+          <li><strong>GET /api/appointments/patient/:patientId</strong> - list patient bookings</li>
+        </ul>
+        <h2>Example usage</h2>
+        <pre><code>GET /api/appointments/availability?department=Cardiology</code></pre>
+        <pre><code>POST /api/appointments</code></pre>
+        <p>All requests require the header <code>x-api-key</code>.</p>
+      </body>
+    </html>
+  `);
+});
+
 app.get('/api/appointments/availability', requireApiKey, (req, res) => {
   const { department, hospitalId } = req.query;
-  if (!department) {
-    return res.status(400).json({ success: false, message: 'Missing required query parameter: department.' });
-  }
 
   const matches = appointmentSlots.filter((slot) => {
-    const departmentMatch = slot.department.toLowerCase() === department.toLowerCase();
+    const departmentMatch = department ? slot.department.toLowerCase() === department.toLowerCase() : true;
     const hospitalMatch = hospitalId ? slot.hospitalId === hospitalId : true;
     return slot.isAvailable && departmentMatch && hospitalMatch;
   });
