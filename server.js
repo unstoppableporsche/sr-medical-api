@@ -55,6 +55,31 @@ function formatSlot(slot) {
   };
 }
 
+function buildSummary() {
+  const available = appointmentSlots.filter((slot) => slot.isAvailable);
+  const departments = available.reduce((summary, slot) => {
+    const key = slot.department;
+    if (!summary[key]) {
+      summary[key] = {
+        department: slot.department,
+        totalAvailable: 0,
+        hospitalIds: new Set(),
+        nextSlot: slot.startTime,
+      };
+    }
+    summary[key].totalAvailable += 1;
+    summary[key].hospitalIds.add(slot.hospitalId);
+    return summary;
+  }, {});
+
+  return Object.values(departments).map((item) => ({
+    department: item.department,
+    totalAvailable: item.totalAvailable,
+    hospitalIds: Array.from(item.hospitalIds),
+    nextSlot: item.nextSlot,
+  }));
+}
+
 app.get('/', (req, res) => {
   res.send(`
     <html>
@@ -73,17 +98,23 @@ app.get('/', (req, res) => {
         <h2>Available routes</h2>
         <ul>
           <li><strong>GET /api/health</strong> - service health check</li>
+          <li><strong>GET /api/appointments/summary</strong> - public department summary of available slots</li>
           <li><strong>GET /api/appointments/availability</strong> - list available slots</li>
           <li><strong>POST /api/appointments</strong> - book an appointment</li>
           <li><strong>GET /api/appointments/patient/:patientId</strong> - list patient bookings</li>
         </ul>
         <h2>Example usage</h2>
+        <pre><code>GET /api/appointments/summary</code></pre>
         <pre><code>GET /api/appointments/availability?department=Cardiology</code></pre>
         <pre><code>POST /api/appointments</code></pre>
-        <p>All requests require the header <code>x-api-key</code>.</p>
+        <p>Only <code>/api/appointments/summary</code> and <code>/api/health</code> are public.</p>
       </body>
     </html>
   `);
+});
+
+app.get('/api/appointments/summary', (req, res) => {
+  return res.json({ success: true, departments: buildSummary() });
 });
 
 app.get('/api/appointments/availability', requireApiKey, (req, res) => {
