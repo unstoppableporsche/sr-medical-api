@@ -33,6 +33,89 @@ const patients = loadJson('patients.json', []);
 const appointmentSlots = loadJson('appointmentSlots.json', []);
 const bookedAppointments = loadJson('bookedAppointments.json', []);
 
+// Dynamically generate future slots at runtime so availability can return many
+// future slots without editing the source JSON. Configurable by months, doctors
+// per department, and slots per doctor.
+function generateFutureSlots({ months = 6, doctorsPerDept = 6, slotsPerDoctor = 6 } = {}) {
+  const msInDay = 24 * 60 * 60 * 1000;
+  const maxDays = Math.round(months * 30.44);
+  const today = new Date();
+  const existingDeptSet = new Set(appointmentSlots.map((s) => s.department));
+  const departments = Array.from(existingDeptSet.length ? existingDeptSet : ['General Practice', 'Cardiology', 'Pediatrics', 'Dermatology', 'Neurology']);
+
+  const sampleNames = [
+    'Alex Morgan', 'Priya Desai', 'Daniel Ortiz', 'Sanjay Kapoor', 'Emily Johnson', 'Michael Chen',
+    'Sara Lopez', 'James Patel', 'Alice Kumar', 'Robert Diaz', 'Linda Park', 'Yasmin Ali'
+  ];
+
+  const times = ['09:00', '10:30', '14:00', '15:30', '17:00'];
+
+  let added = 0;
+
+  function makeDeptCode(department) {
+    return department.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 6);
+  }
+
+  for (const department of departments) {
+    const code = makeDeptCode(department);
+
+    for (let dIndex = 1; dIndex <= doctorsPerDept; dIndex++) {
+      const doctorId = `${code}-DR-${String(dIndex).padStart(3, '0')}`;
+      const doctorName = sampleNames[(dIndex - 1) % sampleNames.length];
+      const doctorRole = department === 'Pediatrics' ? 'Pediatrician' : `${department} Specialist`;
+
+      for (let sIndex = 0; sIndex < slotsPerDoctor; sIndex++) {
+        // Spread slots weekly across the range, with a small offset to vary weekdays
+        const daysFromNow = Math.round((sIndex * 7) + (dIndex % 3));
+        if (daysFromNow > maxDays) continue;
+
+        const date = new Date(today.getTime() + daysFromNow * msInDay);
+        const time = times[(dIndex + sIndex) % times.length];
+        const [hourStr, minuteStr] = time.split(':');
+        date.setHours(parseInt(hourStr, 10));
+        date.setMinutes(parseInt(minuteStr, 10));
+        date.setSeconds(0);
+
+        if (date <= today) continue; // only future slots
+
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        const hh = String(date.getHours()).padStart(2, '0');
+        const mm = String(date.getMinutes()).padStart(2, '0');
+
+        const slotId = `${code}-GEN-${y}${m}${dd}-${hh}${mm}-${dIndex}-${sIndex}`;
+
+        // Avoid duplicates
+        if (appointmentSlots.find((s) => s.slotId === slotId)) continue;
+
+        const startTime = date.toDateString() + ' ' + date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+
+        const slot = {
+          hospitalId: `HOSP-${String((dIndex % 5) + 1).padStart(3, '0')}`,
+          department,
+          doctorId,
+          doctorName,
+          doctorRole,
+          slotId,
+          startTime,
+          isAvailable: true,
+          insertedDate: new Date().toISOString(),
+          updatedDate: new Date().toISOString(),
+        };
+
+        appointmentSlots.push(slot);
+        added += 1;
+      }
+    }
+  }
+
+  console.log(`Generated ${added} dynamic future slots (months=${months}, doctorsPerDept=${doctorsPerDept}, slotsPerDoctor=${slotsPerDoctor}).`);
+}
+
+// Generate a healthy number of future slots on startup. Adjust params as needed.
+generateFutureSlots({ months: 6, doctorsPerDept: 6, slotsPerDoctor: 6 });
+
 function requireApiKey(req, res, next) {
   if (!API_KEY) return res.status(500).json({ success: false, message: 'Server API key not configured.' });
   const key = req.header('x-api-key');
