@@ -125,6 +125,35 @@ function requireApiKey(req, res, next) {
   next();
 }
 
+function parseStartTimeFromSlotId(slotId) {
+  // Support both formats: YYYY-MM-DD-HHMM and YYYYMMDD-HHMM embedded at the end.
+  const dateTimeMatch = slotId.match(/(\d{4})(?:-?(\d{2})(?:-?(\d{2}))?)-(\d{2})(\d{2})$/);
+  if (!dateTimeMatch) return null;
+
+  const year = Number(dateTimeMatch[1]);
+  const month = Number(dateTimeMatch[2]);
+  const day = Number(dateTimeMatch[3]);
+  const hour = Number(dateTimeMatch[4]);
+  const minute = Number(dateTimeMatch[5]);
+
+  if (!year || !month || !day || hour > 23 || minute > 59) return null;
+
+  const date = new Date(year, month - 1, day, hour, minute, 0);
+  if (Number.isNaN(date.getTime())) return null;
+
+  return `${date.toDateString()} ${date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: true,
+  })}`;
+}
+
+function normalizeSlotStartTime(slot) {
+  const parsed = parseStartTimeFromSlotId(slot.slotId);
+  if (!parsed) return slot.startTime;
+  return parsed;
+}
+
 function formatSlot(slot) {
   return {
     hospitalId: slot.hospitalId,
@@ -133,7 +162,7 @@ function formatSlot(slot) {
     doctorName: slot.doctorName,
     doctorRole: slot.doctorRole,
     slotId: slot.slotId,
-    startTime: slot.startTime,
+    startTime: normalizeSlotStartTime(slot),
     isAvailable: slot.isAvailable,
   };
 }
@@ -147,7 +176,7 @@ function buildSummary() {
         department: slot.department,
         totalAvailable: 0,
         hospitalIds: new Set(),
-        nextSlot: slot.startTime,
+        nextSlot: normalizeSlotStartTime(slot),
       };
     }
     summary[key].totalAvailable += 1;
