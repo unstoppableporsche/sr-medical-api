@@ -296,7 +296,7 @@ app.post('/api/appointments', requireApiKey, (req, res) => {
       doctorName: slot.doctorName,
       doctorRole: slot.doctorRole,
       slotId: slot.slotId,
-      startTime: slot.startTime,
+      startTime: normalizeSlotStartTime(slot),
       reason,
     },
   });
@@ -324,7 +324,7 @@ app.get('/api/appointments/patient/:patientId', requireApiKey, (req, res) => {
         doctorName: slot.doctorName || null,
         doctorRole: slot.doctorRole || null,
         slotId: appointment.slotId,
-        startTime: slot.startTime || null,
+        startTime: normalizeSlotStartTime(slot) || null,
         reason: appointment.reason,
         status: appointment.status,
         bookedAt: appointment.bookedAt,
